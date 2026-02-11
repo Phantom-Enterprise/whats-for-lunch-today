@@ -13,6 +13,30 @@
     gap: 1.5rem;
 }
 
+.locationButton {
+    background-color: var(--color-white);
+    border: 2px dashed var(--color-primary);
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    padding: 0.8rem;
+    transition: var(--transition);
+}
+
+.locationButton:hover:not(:disabled) {
+    background-color: #FFF0F0;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.locationButton.success {
+    background-color: #E8F5E9;
+    border-color: #4CAF50;
+    color: #2E7D32;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
 .filterGroup {
     display: flex;
     flex-direction: column;

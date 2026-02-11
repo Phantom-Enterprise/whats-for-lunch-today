@@ -1,22 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ResultCard from './ResultCard';
-import { restaurants } from '../data/restaurants';
+import { getRestaurants, restaurants as defaultRestaurants } from '../data/restaurants';
 import styles from './LunchSelector.module.css';
 
 export default function LunchSelector() {
     const [selectedLunch, setSelectedLunch] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [restaurantData, setRestaurantData] = useState(defaultRestaurants);
+    const [locationStatus, setLocationStatus] = useState(null); // null, 'loading', 'success', 'error'
     const [filters, setFilters] = useState({
         price: 'all',
         cuisine: 'all',
     });
 
-    const uniqueCuisines = ['all', ...new Set(restaurants.map(r => r.cuisine))];
+    const uniqueCuisines = ['all', ...new Set(restaurantData.map(r => r.cuisine))];
     const prices = ['all', '$', '$$', '$$$'];
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const getUserLocation = () => {
+        setLocationStatus('loading');
+        if (!navigator.geolocation) {
+            setLocationStatus('error');
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const nearbyRestaurants = getRestaurants(latitude, longitude);
+                setRestaurantData(nearbyRestaurants);
+                setLocationStatus('success');
+            },
+            (error) => {
+                console.error("Error getting location:", error);
+                setLocationStatus('error');
+                alert("Unable to retrieve your location");
+            }
+        );
     };
 
     const decideLunch = () => {
@@ -25,18 +50,21 @@ export default function LunchSelector() {
 
         // Simulate thinking/spinning delay
         setTimeout(() => {
-            const filtered = restaurants.filter(r => {
+            const filtered = restaurantData.filter(r => {
                 const priceMatch = filters.price === 'all' || r.price === filters.price;
                 const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
                 return priceMatch && cuisineMatch;
             });
 
             if (filtered.length === 0) {
-                alert("No restaurants match your filters! Try loosening them."); // Simple alert for now
+                alert("No restaurants match your filters! Try loosening them.");
                 setIsSpinning(false);
                 return;
             }
 
+            // If location is used, weigh closer restaurants slightly higher? 
+            // For now, let's just pick random from the filtered list which is already sorted by distance if location is on
+            // Actually, let's pick randomly to keep the "spin" feel, but the list display helps.
             const random = filtered[Math.floor(Math.random() * filtered.length)];
             setSelectedLunch(random);
             setIsSpinning(false);
@@ -47,6 +75,16 @@ export default function LunchSelector() {
         <div className={styles.container}>
             {!selectedLunch && !isSpinning && (
                 <div className={styles.filters}>
+                    <button
+                        onClick={getUserLocation}
+                        className={`${styles.locationButton} ${locationStatus === 'success' ? styles.success : ''}`}
+                        disabled={locationStatus === 'loading' || locationStatus === 'success'}
+                    >
+                        {locationStatus === 'loading' ? 'Locating... 🛰️' :
+                            locationStatus === 'success' ? 'Location Found! 📍' :
+                                'Use My Location 📍'}
+                    </button>
+
                     <div className={styles.filterGroup}>
                         <label>Cuisine</label>
                         <select name="cuisine" value={filters.cuisine} onChange={handleFilterChange}>

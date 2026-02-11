@@ -1,11 +1,11 @@
-export const restaurants = [
+
+const baseRestaurants = [
     {
         id: 1,
         name: "Sushi Zen",
         cuisine: "Japanese",
         price: "$$",
         rating: 4.8,
-        distance: "0.2 mi",
         deal: "10% off lunch special",
         emoji: "🍣",
         image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c3VzaGl8ZW58MHx8MHx8fDA%3D"
@@ -16,7 +16,6 @@ export const restaurants = [
         cuisine: "American",
         price: "$",
         rating: 4.5,
-        distance: "0.5 mi",
         deal: null,
         emoji: "🍔",
         image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YnVyZ2VyfGVufDB8fDB8fHww"
@@ -27,7 +26,6 @@ export const restaurants = [
         cuisine: "Italian",
         price: "$$$",
         rating: 4.9,
-        distance: "1.2 mi",
         deal: "Free dessert with entree",
         emoji: "🍝",
         image: "https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cGFzdGF8ZW58MHx8MHx8fDA%3D"
@@ -38,7 +36,6 @@ export const restaurants = [
         cuisine: "Mexican",
         price: "$",
         rating: 4.6,
-        distance: "0.8 mi",
         deal: "Taco Tuesday: $2 tacos",
         emoji: "🌮",
         image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGFjb3N8ZW58MHx8MHx8fDA%3D"
@@ -49,7 +46,6 @@ export const restaurants = [
         cuisine: "Salad",
         price: "$$",
         rating: 4.7,
-        distance: "0.3 mi",
         deal: null,
         emoji: "🥗",
         image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2FsYWR8ZW58MHx8MHx8fDA%3D"
@@ -60,7 +56,6 @@ export const restaurants = [
         cuisine: "Indian",
         price: "$$",
         rating: 4.4,
-        distance: "1.5 mi",
         deal: "Free naan with curry",
         emoji: "🍛",
         image: "https://images.unsplash.com/photo-1631298045866-932f22295b99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y3Vycnl8ZW58MHx8MHx8fDA%3D"
@@ -71,7 +66,6 @@ export const restaurants = [
         cuisine: "Italian",
         price: "$$",
         rating: 4.3,
-        distance: "0.7 mi",
         deal: null,
         emoji: "🍕",
         image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl6emF8ZW58MHx8MHx8fDA%3D"
@@ -82,9 +76,58 @@ export const restaurants = [
         cuisine: "Chinese",
         price: "$$",
         rating: 4.6,
-        distance: "0.9 mi",
         deal: null,
         emoji: "🥟",
         image: "https://images.unsplash.com/photo-1496116218417-1a781b1c423c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZGltJTIwc3VtfGVufDB8fDB8fHww"
     },
 ];
+
+// Helper to calculate distance in miles
+function getDistanceFromLatLonInMi(lat1, lon1, lat2, lon2) {
+    var R = 3958.8; // Radius of the earth in miles
+    var dLat = deg2rad(lat2 - lat1);
+    var dLon = deg2rad(lon2 - lon1);
+    var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c; // Distance in miles
+    return d;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180)
+}
+
+// Generate random coordinates within a range
+function getRandomCoordinate(base, range) {
+    return base + (Math.random() - 0.5) * range;
+}
+
+export function getRestaurants(userLat = null, userLng = null) {
+    if (!userLat || !userLng) {
+        // Return with original mocked distances if no location provided
+        return baseRestaurants.map(r => ({ ...r, distance: r.distance || (Math.random() * 2 + 0.1).toFixed(1) + " mi" }));
+    }
+
+    return baseRestaurants.map(r => {
+        // Generate a mock location near the user (within ~2 miles)
+        // 1 deg lat is ~69 miles. 2 miles is ~0.03 degrees
+        const lat = getRandomCoordinate(userLat, 0.03);
+        const lng = getRandomCoordinate(userLng, 0.03);
+        const dist = getDistanceFromLatLonInMi(userLat, userLng, lat, lng);
+
+        return {
+            ...r,
+            distance: dist.toFixed(1) + " mi",
+            // Store exact coords if we want to map them precisely later
+            lat,
+            lng
+        };
+    }).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+}
+
+// Default export for backward compatibility if needed, though we will switch to using named export
+export const restaurants = baseRestaurants.map(r => ({ ...r, distance: "1.0 mi" })); // Default fallback
