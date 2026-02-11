@@ -5,6 +5,12 @@ export default function ResultCard({ restaurant, onReset }) {
 
     return (
         <div className={styles.card}>
+            {restaurant.fallbackMessage && (
+                <div className={styles.fallbackBanner}>
+                    ℹ️ {restaurant.fallbackMessage}
+                </div>
+            )}
+
             <div className={styles.imageContainer}>
                 {restaurant.image && <img src={restaurant.image} alt={restaurant.name} className={styles.image} />}
                 <div className={styles.emoji}>{restaurant.emoji}</div>

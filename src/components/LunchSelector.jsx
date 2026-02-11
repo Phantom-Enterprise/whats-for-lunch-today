@@ -52,21 +52,48 @@ export default function LunchSelector() {
 
         // Simulate thinking/spinning delay
         setTimeout(() => {
-            const filtered = restaurantData.filter(r => {
+            let filtered = restaurantData.filter(r => {
                 const priceMatch = filters.price === 'all' || r.price === filters.price;
                 const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
                 return priceMatch && cuisineMatch;
             });
 
+            let fallbackMessage = null;
+
+            // If no results, try fallback strategies
             if (filtered.length === 0) {
-                alert("No restaurants match your filters! Try loosening them.");
-                setIsSpinning(false);
-                return;
+                // Strategy 1: Try relaxing price filter only
+                if (filters.price !== 'all') {
+                    filtered = restaurantData.filter(r => {
+                        const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
+                        return cuisineMatch;
+                    });
+                    if (filtered.length > 0) {
+                        fallbackMessage = `No ${filters.price} ${filters.cuisine !== 'all' ? filters.cuisine : ''} restaurants open. Showing other prices.`;
+                    }
+                }
+
+                // Strategy 2: If still no results, try relaxing cuisine filter only
+                if (filtered.length === 0 && filters.cuisine !== 'all') {
+                    filtered = restaurantData.filter(r => {
+                        const priceMatch = filters.price === 'all' || r.price === filters.price;
+                        return priceMatch;
+                    });
+                    if (filtered.length > 0) {
+                        fallbackMessage = `No ${filters.cuisine} restaurants open. Showing other cuisines.`;
+                    }
+                }
+
+                // Strategy 3: If still no results, show all open restaurants
+                if (filtered.length === 0) {
+                    filtered = restaurantData;
+                    fallbackMessage = "No restaurants match your filters. Showing all open restaurants nearby.";
+                }
             }
 
             // If location is enabled (restaurants have distance), prioritize nearby options
             let selected;
-            if (locationStatus === 'success' && filtered[0].distance) {
+            if (locationStatus === 'success' && filtered[0]?.distance) {
                 // Take the top 5 closest restaurants from filtered list (already sorted by distance)
                 const nearbyOptions = filtered.slice(0, Math.min(5, filtered.length));
 
@@ -90,6 +117,11 @@ export default function LunchSelector() {
             } else {
                 // No location - pick randomly from all filtered
                 selected = filtered[Math.floor(Math.random() * filtered.length)];
+            }
+
+            // Add fallback message to selected restaurant if applicable
+            if (fallbackMessage) {
+                selected = { ...selected, fallbackMessage };
             }
 
             setSelectedLunch(selected);
