@@ -11,6 +11,12 @@ export default function ResultCard({ restaurant, onReset }) {
                 </div>
             )}
 
+            {restaurant.deal && (
+                <div className={styles.dealBanner}>
+                    🎉 LUNCH DEAL: {restaurant.deal}
+                </div>
+            )}
+
             <div className={styles.imageContainer}>
                 {restaurant.image && <img src={restaurant.image} alt={restaurant.name} className={styles.image} />}
                 <div className={styles.emoji}>{restaurant.emoji}</div>
@@ -24,15 +30,9 @@ export default function ResultCard({ restaurant, onReset }) {
                 </div>
                 <p className={styles.distance}>📍 {restaurant.distance} away</p>
 
-                {restaurant.deal && (
-                    <div className={styles.deal}>
-                        🏷️ {restaurant.deal}
-                    </div>
-                )}
-
                 <div className={styles.linkButtons}>
                     <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' Miami')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.mapLink}

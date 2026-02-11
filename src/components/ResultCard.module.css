@@ -18,6 +18,31 @@
     border-bottom: 2px solid #FFEAA7;
 }
 
+.dealBanner {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    color: white;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 3px solid #E74C3C;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+}
+
 .imageContainer {
     height: 200px;
     background-color: var(--color-secondary);
