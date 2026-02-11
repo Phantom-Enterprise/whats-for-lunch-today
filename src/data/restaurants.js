@@ -113,10 +113,10 @@ export function getRestaurants(userLat = null, userLng = null) {
     }
 
     return baseRestaurants.map(r => {
-        // Generate a mock location near the user (within ~2 miles)
-        // 1 deg lat is ~69 miles. 2 miles is ~0.03 degrees
-        const lat = getRandomCoordinate(userLat, 0.03);
-        const lng = getRandomCoordinate(userLng, 0.03);
+        // Generate a mock location near the user (within ~5 miles)
+        // 1 deg lat is ~69 miles. 5 miles is ~0.072 degrees
+        const lat = getRandomCoordinate(userLat, 0.075);
+        const lng = getRandomCoordinate(userLng, 0.075);
         const dist = getDistanceFromLatLonInMi(userLat, userLng, lat, lng);
 
         return {
