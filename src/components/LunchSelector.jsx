@@ -62,11 +62,35 @@ export default function LunchSelector() {
                 return;
             }
 
-            // If location is used, weigh closer restaurants slightly higher? 
-            // For now, let's just pick random from the filtered list which is already sorted by distance if location is on
-            // Actually, let's pick randomly to keep the "spin" feel, but the list display helps.
-            const random = filtered[Math.floor(Math.random() * filtered.length)];
-            setSelectedLunch(random);
+            // If location is enabled (restaurants have distance), prioritize nearby options
+            let selected;
+            if (locationStatus === 'success' && filtered[0].distance) {
+                // Take the top 5 closest restaurants from filtered list (already sorted by distance)
+                const nearbyOptions = filtered.slice(0, Math.min(5, filtered.length));
+
+                // Weighted random: heavily favor the closest options
+                // Assign weights: closest gets 5, next gets 4, etc.
+                const weights = nearbyOptions.map((_, index) => nearbyOptions.length - index);
+                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
+                let random = Math.random() * totalWeight;
+                let selectedIndex = 0;
+
+                for (let i = 0; i < weights.length; i++) {
+                    random -= weights[i];
+                    if (random <= 0) {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+
+                selected = nearbyOptions[selectedIndex];
+            } else {
+                // No location - pick randomly from all filtered
+                selected = filtered[Math.floor(Math.random() * filtered.length)];
+            }
+
+            setSelectedLunch(selected);
             setIsSpinning(false);
         }, 1500);
     };
