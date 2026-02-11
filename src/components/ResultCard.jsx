@@ -24,14 +24,25 @@ export default function ResultCard({ restaurant, onReset }) {
                     </div>
                 )}
 
-                <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + " " + restaurant.cuisine)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.mapLink}
-                >
-                    View on Google Maps 🗺️
-                </a>
+                <div className={styles.linkButtons}>
+                    <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.mapLink}
+                    >
+                        📍 Directions
+                    </a>
+
+                    <a
+                        href={restaurant.menuUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.menuLink}
+                    >
+                        📋 Menu
+                    </a>
+                </div>
 
                 <button onClick={onReset} className={styles.button}>
                     Spin Again 🔄

@@ -89,10 +89,16 @@
     border: 1px dashed #F5B041;
 }
 
-.mapLink {
-    display: block;
-    text-align: center;
+.linkButtons {
+    display: flex;
+    gap: 0.75rem;
     margin-bottom: 1rem;
+}
+
+.mapLink,
+.menuLink {
+    flex: 1;
+    text-align: center;
     color: var(--color-text);
     text-decoration: none;
     font-weight: 600;
@@ -100,11 +106,15 @@
     border: 2px solid var(--color-secondary);
     border-radius: var(--radius-md);
     transition: var(--transition);
+    font-size: 0.9rem;
 }
 
-.mapLink:hover {
+.mapLink:hover,
+.menuLink:hover {
     background-color: var(--color-secondary);
     color: var(--color-text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
 }
 
 .button {
