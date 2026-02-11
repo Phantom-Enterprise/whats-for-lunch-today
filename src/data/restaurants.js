@@ -210,11 +210,14 @@ export function getRestaurants(userLat = null, userLng = null) {
         return {
             ...r,
             distance: dist.toFixed(1) + " mi",
+            distanceValue: dist, // Store numeric value for filtering
             // Store exact coords if we want to map them precisely later
             lat,
             lng
         };
-    }).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+    })
+        .filter(r => r.distanceValue <= 5) // Only show restaurants within 5 miles
+        .sort((a, b) => a.distanceValue - b.distanceValue);
 }
 
 // Default export for backward compatibility if needed, though we will switch to using named export
