@@ -8,6 +8,7 @@ export default function LunchSelector() {
     const [isSpinning, setIsSpinning] = useState(false);
     const [restaurantData, setRestaurantData] = useState(defaultRestaurants);
     const [locationStatus, setLocationStatus] = useState(null); // null, 'loading', 'success', 'error'
+    const [showList, setShowList] = useState(false);
     const [filters, setFilters] = useState({
         price: 'all',
         cuisine: 'all',
@@ -35,6 +36,7 @@ export default function LunchSelector() {
                 const nearbyRestaurants = getRestaurants(latitude, longitude);
                 setRestaurantData(nearbyRestaurants);
                 setLocationStatus('success');
+                setShowList(true); // Show the list after location is found
             },
             (error) => {
                 console.error("Error getting location:", error);
@@ -95,9 +97,17 @@ export default function LunchSelector() {
         }, 1500);
     };
 
+    const getFilteredRestaurants = () => {
+        return restaurantData.filter(r => {
+            const priceMatch = filters.price === 'all' || r.price === filters.price;
+            const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
+            return priceMatch && cuisineMatch;
+        });
+    };
+
     return (
         <div className={styles.container}>
-            {!selectedLunch && !isSpinning && (
+            {!selectedLunch && !isSpinning && !showList && (
                 <div className={styles.filters}>
                     <button
                         onClick={getUserLocation}
@@ -129,6 +139,36 @@ export default function LunchSelector() {
 
                     <button onClick={decideLunch} className={styles.spinButton}>
                         Pick My Lunch! 🎲
+                    </button>
+                </div>
+            )}
+
+            {showList && !selectedLunch && !isSpinning && (
+                <div className={styles.restaurantList}>
+                    <h3>Nearby Restaurants 📍</h3>
+                    <div className={styles.listContainer}>
+                        {getFilteredRestaurants().slice(0, 10).map(restaurant => (
+                            <div
+                                key={restaurant.id}
+                                className={styles.listItem}
+                                onClick={() => setSelectedLunch(restaurant)}
+                            >
+                                <div className={styles.listItemEmoji}>{restaurant.emoji}</div>
+                                <div className={styles.listItemInfo}>
+                                    <div className={styles.listItemName}>{restaurant.name}</div>
+                                    <div className={styles.listItemDetails}>
+                                        {restaurant.cuisine} • {restaurant.price} • ⭐ {restaurant.rating}
+                                    </div>
+                                    {restaurant.deal && (
+                                        <div className={styles.listItemDeal}>🏷️ {restaurant.deal}</div>
+                                    )}
+                                </div>
+                                <div className={styles.listItemDistance}>{restaurant.distance}</div>
+                            </div>
+                        ))}
+                    </div>
+                    <button onClick={() => setShowList(false)} className={styles.backButton}>
+                        ← Back to Filters
                     </button>
                 </div>
             )}
