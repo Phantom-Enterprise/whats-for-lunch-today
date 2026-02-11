@@ -1,0 +1,74 @@
+:root {
+  --color-primary: #FFB7B2; /* Soft Peach/Pink */
+  --color-secondary: #B5EAD7; /* Mint Green */
+  --color-accent: #C7CEEA; /* Soft Periwinkle/Sky Blue */
+  --color-background: #FFDAC1; /* Creamy Peach/Off-white - maybe too orange, let's go lighter */
+  --color-background-light: #FFF9F5; /* Very light cream */
+  --color-text: #6B5B5B; /* Soft Brown for text */
+  --color-white: #FFFFFF;
+  
+  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.1);
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --transition: all 0.3s ease;
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  color-scheme: light dark;
+  color: var(--color-text);
+  background-color: var(--color-background-light);
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-background-light) 0%, var(--color-primary) 100%);
+}
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1, h2, h3 {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+button {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  padding: 0.8em 1.5em;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1em;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  background-color: #FFA09A; /* Slightly darker */
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
