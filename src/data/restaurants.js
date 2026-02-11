@@ -80,6 +80,56 @@ const baseRestaurants = [
         emoji: "🥟",
         image: "https://images.unsplash.com/photo-1496116218417-1a781b1c423c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZGltJTIwc3VtfGVufDB8fDB8fHww"
     },
+    {
+        id: 9,
+        name: "Havana Cafe",
+        cuisine: "Cuban",
+        price: "$$",
+        rating: 4.8,
+        deal: "Cafecito + pastelito combo $5",
+        emoji: "🇨🇺",
+        image: "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y3ViYW4lMjBmb29kfGVufDB8fDB8fHww"
+    },
+    {
+        id: 10,
+        name: "Stone Crab Shack",
+        cuisine: "Seafood",
+        price: "$$$",
+        rating: 4.9,
+        deal: null,
+        emoji: "🦀",
+        image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2VhZm9vZHxlbnwwfHwwfHx8MA%3D%3D"
+    },
+    {
+        id: 11,
+        name: "Island Jerk Kitchen",
+        cuisine: "Caribbean",
+        price: "$",
+        rating: 4.7,
+        deal: "Jerk chicken platter + plantains",
+        emoji: "🏝️",
+        image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8amVyayUyMGNoaWNrZW58ZW58MHx8MHx8fDA%3D"
+    },
+    {
+        id: 12,
+        name: "Ceviche Bar",
+        cuisine: "Latin Fusion",
+        price: "$$",
+        rating: 4.6,
+        deal: "Happy hour: $8 ceviche",
+        emoji: "🐟",
+        image: "https://images.unsplash.com/photo-1580217593608-61931cefc821?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2V2aWNoZXxlbnwwfHwwfHx8MA%3D%3D"
+    },
+    {
+        id: 13,
+        name: "Key West Grill",
+        cuisine: "Seafood",
+        price: "$$",
+        rating: 4.5,
+        deal: null,
+        emoji: "🦞",
+        image: "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bG9ic3RlcnxlbnwwfHwwfHx8MA%3D%3D"
+    },
 ];
 
 // Helper to calculate distance in miles
