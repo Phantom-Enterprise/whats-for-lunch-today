@@ -5,6 +5,7 @@ A fun web application built with React and Vite to help you decide what to eat f
 ## Features
 - **Spin the Wheel**: Randomly select a lunch option from a list of local favorites.
 - **Filters**: Narrow down choices by Cuisine and Price range.
+- **Google Maps Integration**: Get directions to your chosen restaurant with one click.
 - **Visuals**: Beautiful soft pastel theme with emoji icons and food images.
 - **Deals**: Highlights restaurants with special offers.
 

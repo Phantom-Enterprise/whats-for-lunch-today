@@ -89,6 +89,24 @@
     border: 1px dashed #F5B041;
 }
 
+.mapLink {
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.8rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.mapLink:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+}
+
 .button {
     width: 100%;
     background-color: var(--color-accent);
