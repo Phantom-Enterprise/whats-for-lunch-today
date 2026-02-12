@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ResultCard from './ResultCard';
 import { getRestaurants, restaurants as defaultRestaurants } from '../data/restaurants';
 import styles from './LunchSelector.module.css';
@@ -10,6 +10,7 @@ export default function LunchSelector() {
     const [locationStatus, setLocationStatus] = useState(null);
     const [showList, setShowList] = useState(false);
     const [spinningSlots, setSpinningSlots] = useState([null, null, null]);
+    const [stoppedReels, setStoppedReels] = useState([false, false, false]);
     const [filters, setFilters] = useState({
         price: 'all',
         cuisine: 'all',
@@ -50,6 +51,7 @@ export default function LunchSelector() {
     const decideLunch = () => {
         setIsSpinning(true);
         setSelectedLunch(null);
+        setStoppedReels([false, false, false]);
 
         // Get filtered restaurants
         let filtered = restaurantData.filter(r => {
@@ -59,123 +61,104 @@ export default function LunchSelector() {
         });
 
         let fallbackMessage = null;
-
-        // Fallback logic
         if (filtered.length === 0) {
             if (filters.price !== 'all') {
-                filtered = restaurantData.filter(r => {
-                    const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
-                    return cuisineMatch;
-                });
-                if (filtered.length > 0) {
-                    fallbackMessage = `No ${filters.price} ${filters.cuisine !== 'all' ? filters.cuisine : ''} restaurants open. Showing other prices.`;
+                const relaxed = restaurantData.filter(r => filters.cuisine === 'all' || r.cuisine === filters.cuisine);
+                if (relaxed.length > 0) {
+                    filtered = relaxed;
+                    fallbackMessage = `No ${filters.price} options found. Relaxing price filter...`;
                 }
             }
-
             if (filtered.length === 0 && filters.cuisine !== 'all') {
-                filtered = restaurantData.filter(r => {
-                    const priceMatch = filters.price === 'all' || r.price === filters.price;
-                    return priceMatch;
-                });
-                if (filtered.length > 0) {
-                    fallbackMessage = `No ${filters.cuisine} restaurants open. Showing other cuisines.`;
+                const relaxed = restaurantData.filter(r => filters.price === 'all' || r.price === filters.price);
+                if (relaxed.length > 0) {
+                    filtered = relaxed;
+                    fallbackMessage = `No ${filters.cuisine} found. Relaxing cuisine filter...`;
                 }
             }
-
             if (filtered.length === 0) {
                 filtered = restaurantData;
-                fallbackMessage = "No restaurants match your filters. Showing all open restaurants nearby.";
+                fallbackMessage = "No matches. Showing all open restaurants.";
             }
         }
 
-        // Animate slot machine reels
-        const spinInterval = setInterval(() => {
-            setSpinningSlots([
-                filtered[Math.floor(Math.random() * filtered.length)],
-                filtered[Math.floor(Math.random() * filtered.length)],
-                filtered[Math.floor(Math.random() * filtered.length)]
-            ]);
-        }, 100);
+        // Determine final winner early to sync with reel stops
+        let winner;
+        if (locationStatus === 'success' && filtered[0]?.distance) {
+            const nearbyOptions = filtered.slice(0, Math.min(5, filtered.length));
+            const weights = nearbyOptions.map((_, index) => nearbyOptions.length - index);
+            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+            let random = Math.random() * totalWeight;
+            let winnerIdx = 0;
+            for (let i = 0; i < weights.length; i++) {
+                random -= weights[i];
+                if (random <= 0) { winnerIdx = i; break; }
+            }
+            winner = nearbyOptions[winnerIdx];
+        } else {
+            winner = filtered[Math.floor(Math.random() * filtered.length)];
+        }
+        if (fallbackMessage) winner = { ...winner, fallbackMessage };
 
-        // Stop spinning after delay and select winner
+        // Start Animation
+        const spinRate = 80;
+        const interval = setInterval(() => {
+            setSpinningSlots(current => {
+                return current.map((slot, i) => {
+                    if (stoppedReels[i]) return slot;
+                    return filtered[Math.floor(Math.random() * filtered.length)];
+                });
+            });
+        }, spinRate);
+
+        // Sequential Stops
+        setTimeout(() => setStoppedReels(prev => [true, prev[1], prev[2]]), 1000);
+        setTimeout(() => setStoppedReels(prev => [prev[0], true, prev[2]]), 1800);
         setTimeout(() => {
-            clearInterval(spinInterval);
+            setStoppedReels([true, true, true]);
+            setSpinningSlots([winner, winner, winner]);
+            clearInterval(interval);
 
-            let selected;
-            if (locationStatus === 'success' && filtered[0]?.distance) {
-                const nearbyOptions = filtered.slice(0, Math.min(5, filtered.length));
-                const weights = nearbyOptions.map((_, index) => nearbyOptions.length - index);
-                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-
-                let random = Math.random() * totalWeight;
-                let selectedIndex = 0;
-
-                for (let i = 0; i < weights.length; i++) {
-                    random -= weights[i];
-                    if (random <= 0) {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-
-                selected = nearbyOptions[selectedIndex];
-            } else {
-                selected = filtered[Math.floor(Math.random() * filtered.length)];
-            }
-
-            if (fallbackMessage) {
-                selected = { ...selected, fallbackMessage };
-            }
-
-            // Final slot reveal
-            setSpinningSlots([selected, selected, selected]);
-
+            // Reveal result card after final stop
             setTimeout(() => {
-                setSelectedLunch(selected);
+                setSelectedLunch(winner);
                 setIsSpinning(false);
-                setSpinningSlots([null, null, null]);
-            }, 500);
-        }, 2000);
-    };
-
-    const getFilteredRestaurants = () => {
-        return restaurantData.filter(r => {
-            const priceMatch = filters.price === 'all' || r.price === filters.price;
-            const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
-            return priceMatch && cuisineMatch;
-        });
+            }, 800);
+        }, 2600);
     };
 
     return (
         <div className={styles.container}>
             {!selectedLunch && !isSpinning && !showList && (
-                <div className={styles.filters}>
+                <div className={`${styles.filters} glass`}>
                     <button
                         onClick={getUserLocation}
                         className={`${styles.locationButton} ${locationStatus === 'success' ? styles.success : ''}`}
                         disabled={locationStatus === 'loading' || locationStatus === 'success'}
                     >
-                        {locationStatus === 'loading' ? 'Locating... 🛰️' :
-                            locationStatus === 'success' ? 'Location Found! 📍' :
-                                'Use My Location 📍'}
+                        {locationStatus === 'loading' ? '📍 Locating...' :
+                            locationStatus === 'success' ? '📍 Location Active' :
+                                '📍 Use My Location'}
                     </button>
 
-                    <div className={styles.filterGroup}>
-                        <label>Cuisine</label>
-                        <select name="cuisine" value={filters.cuisine} onChange={handleFilterChange}>
-                            {uniqueCuisines.map(c => (
-                                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <div className={styles.filterGrid}>
+                        <div className={styles.filterGroup}>
+                            <label>Cuisine</label>
+                            <select name="cuisine" value={filters.cuisine} onChange={handleFilterChange}>
+                                {uniqueCuisines.map(c => (
+                                    <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div className={styles.filterGroup}>
-                        <label>Price</label>
-                        <select name="price" value={filters.price} onChange={handleFilterChange}>
-                            {prices.map(p => (
-                                <option key={p} value={p}>{p === 'all' ? 'Any Price' : p}</option>
-                            ))}
-                        </select>
+                        <div className={styles.filterGroup}>
+                            <label>Price</label>
+                            <select name="price" value={filters.price} onChange={handleFilterChange}>
+                                {prices.map(p => (
+                                    <option key={p} value={p}>{p === 'all' ? 'Any Price' : p}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     <button onClick={decideLunch} className={styles.spinButton}>
@@ -185,56 +168,57 @@ export default function LunchSelector() {
             )}
 
             {showList && !selectedLunch && !isSpinning && (
-                <div className={styles.restaurantList}>
-                    <h3>Nearby Restaurants 📍</h3>
+                <div className={`${styles.restaurantList} glass`}>
+                    <div className={styles.listHeader}>
+                        <h3>Nearby Eats 📍</h3>
+                        <button onClick={() => setShowList(false)} className={styles.iconBtn}>✕</button>
+                    </div>
                     <div className={styles.listContainer}>
-                        {getFilteredRestaurants().slice(0, 10).map(restaurant => (
-                            <div
-                                key={restaurant.id}
-                                className={styles.listItem}
-                                onClick={() => setSelectedLunch(restaurant)}
-                            >
-                                <div className={styles.listItemEmoji}>{restaurant.emoji}</div>
+                        {restaurantData.filter(r => {
+                            const pMatch = filters.price === 'all' || r.price === filters.price;
+                            const cMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
+                            return pMatch && cMatch;
+                        }).slice(0, 10).map(r => (
+                            <div key={r.id} className={styles.listItem} onClick={() => setSelectedLunch(r)}>
+                                <div className={styles.listItemEmoji}>{r.emoji}</div>
                                 <div className={styles.listItemInfo}>
-                                    <div className={styles.listItemName}>{restaurant.name}</div>
-                                    <div className={styles.listItemDetails}>
-                                        {restaurant.cuisine} • {restaurant.price} • ⭐ {restaurant.rating}
-                                    </div>
-                                    {restaurant.deal && (
-                                        <div className={styles.listItemDeal}>🏷️ {restaurant.deal}</div>
-                                    )}
+                                    <div className={styles.listItemName}>{r.name}</div>
+                                    <div className={styles.listItemMeta}>{r.cuisine} • {r.price} • ⭐ {r.rating}</div>
                                 </div>
-                                <div className={styles.listItemDistance}>{restaurant.distance}</div>
+                                <div className={styles.listItemDist}>{r.distance}</div>
                             </div>
                         ))}
                     </div>
-                    <button onClick={() => setShowList(false)} className={styles.backButton}>
-                        ← Back to Filters
-                    </button>
                 </div>
             )}
 
             {isSpinning && (
-                <div className={styles.slotMachine}>
-                    <div className={styles.slotMachineTop}>🎰</div>
-                    <div className={styles.slotReels}>
-                        {spinningSlots.map((restaurant, index) => (
-                            <div key={index} className={styles.slotReel}>
-                                <div className={styles.slotWindow}>
-                                    {restaurant && (
-                                        <div className={styles.slotItem}>
-                                            <div className={styles.slotEmoji}>{restaurant.emoji}</div>
-                                            <div className={styles.slotName}>{restaurant.name}</div>
-                                        </div>
-                                    )}
+                <div className={styles.slotMachineBox}>
+                    <div className={styles.slotMachineFrame}>
+                        <div className={styles.slotLights}>
+                            {[...Array(6)].map((_, i) => <div key={i} className={styles.lightBulb}></div>)}
+                        </div>
+
+                        <div className={styles.slotReels}>
+                            {spinningSlots.map((res, i) => (
+                                <div key={i} className={`${styles.slotReel} ${stoppedReels[i] ? styles.stopped : styles.spinning}`}>
+                                    <div className={styles.reelContent}>
+                                        {res && (
+                                            <div className={styles.slotItem}>
+                                                <div className={styles.slotEmoji}>{res.emoji}</div>
+                                                <div className={styles.slotName}>{res.name}</div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+
+                        <div className={styles.slotLeverContainer}>
+                            <div className={`${styles.leverHandle} ${isSpinning ? styles.pulled : ''}`}></div>
+                        </div>
                     </div>
-                    <div className={styles.slotLever}>
-                        <div className={styles.leverHandle}></div>
-                    </div>
-                    <p className={styles.slotText}>🍀 Finding your perfect lunch... 🍀</p>
+                    <div className={styles.slotStatus}>Crunching the numbers...</div>
                 </div>
             )}
 

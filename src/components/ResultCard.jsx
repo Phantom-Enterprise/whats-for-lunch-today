@@ -4,54 +4,71 @@ export default function ResultCard({ restaurant, onReset }) {
     if (!restaurant) return null;
 
     return (
-        <div className={styles.card}>
-            {restaurant.fallbackMessage && (
-                <div className={styles.fallbackBanner}>
-                    ℹ️ {restaurant.fallbackMessage}
-                </div>
-            )}
-
+        <div className={`${styles.card} glass`}>
             {restaurant.deal && (
                 <div className={styles.dealBanner}>
-                    🎉 LUNCH DEAL: {restaurant.deal}
+                    <span className={styles.dealIcon}>🎁</span>
+                    <span className={styles.dealText}>Exclusive Deal: {restaurant.deal}</span>
                 </div>
             )}
 
-            <div className={styles.imageContainer}>
-                {restaurant.image && <img src={restaurant.image} alt={restaurant.name} className={styles.image} />}
-                <div className={styles.emoji}>{restaurant.emoji}</div>
+            {restaurant.fallbackMessage && (
+                <div className={styles.fallbackNote}>
+                    <span className={styles.noteIcon}>ℹ️</span>
+                    {restaurant.fallbackMessage}
+                </div>
+            )}
+
+            <div className={styles.imageSection}>
+                {restaurant.image && <img src={restaurant.image} alt={restaurant.name} className={styles.bgImage} />}
+                <div className={styles.overlay}></div>
+                <div className={styles.mainEmoji}>{restaurant.emoji}</div>
             </div>
+
             <div className={styles.content}>
-                <h2 className={styles.name}>{restaurant.name}</h2>
-                <div className={styles.details}>
+                <div className={styles.header}>
+                    <h2 className={styles.name}>{restaurant.name}</h2>
+                    <div className={styles.ratingBox}>
+                        <span className={styles.ratingStar}>⭐</span>
+                        <span className={styles.ratingVal}>{restaurant.rating}</span>
+                    </div>
+                </div>
+
+                <div className={styles.badgeRow}>
                     <span className={styles.badge}>{restaurant.cuisine}</span>
                     <span className={styles.badge}>{restaurant.price}</span>
-                    <span className={styles.rating}>⭐ {restaurant.rating}</span>
                 </div>
-                <p className={styles.distance}>📍 {restaurant.distance} away</p>
 
-                <div className={styles.linkButtons}>
+                <div className={styles.infoRow}>
+                    <span className={styles.distance}>📍 {restaurant.distance} from you</span>
+                </div>
+
+                <div className={styles.actionGrid}>
                     <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' Miami')}`}
+                        href={
+                            restaurant.lat && restaurant.lng
+                                ? `https://www.google.com/maps/dir/?api=1&destination=${restaurant.lat},${restaurant.lng}`
+                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' Miami')}`
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={styles.mapLink}
+                        className={styles.primaryLink}
                     >
-                        📍 Directions
+                        🗺️ Directions
                     </a>
 
                     <a
                         href={restaurant.menuUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={styles.menuLink}
+                        className={styles.secondaryLink}
                     >
                         📋 Menu
                     </a>
                 </div>
 
-                <button onClick={onReset} className={styles.button}>
-                    Spin Again 🔄
+                <button onClick={onReset} className={styles.resetBtn}>
+                    🔄 Spin Again
                 </button>
             </div>
         </div>
