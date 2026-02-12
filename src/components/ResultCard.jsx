@@ -46,12 +46,12 @@ export default function ResultCard({ restaurant, onReset }) {
 
                 <div className={styles.actionGrid}>
                     <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' ' + restaurant.address)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.primaryLink}
                     >
-                        🗺️ Directions
+                        📍 Open in Maps
                     </a>
 
                     <a
