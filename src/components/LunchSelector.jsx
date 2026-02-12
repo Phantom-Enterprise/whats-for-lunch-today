@@ -7,8 +7,9 @@ export default function LunchSelector() {
     const [selectedLunch, setSelectedLunch] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
     const [restaurantData, setRestaurantData] = useState(defaultRestaurants);
-    const [locationStatus, setLocationStatus] = useState(null); // null, 'loading', 'success', 'error'
+    const [locationStatus, setLocationStatus] = useState(null);
     const [showList, setShowList] = useState(false);
+    const [spinningSlots, setSpinningSlots] = useState([null, null, null]);
     const [filters, setFilters] = useState({
         price: 'all',
         cuisine: 'all',
@@ -36,7 +37,7 @@ export default function LunchSelector() {
                 const nearbyRestaurants = getRestaurants(latitude, longitude);
                 setRestaurantData(nearbyRestaurants);
                 setLocationStatus('success');
-                setShowList(true); // Show the list after location is found
+                setShowList(true);
             },
             (error) => {
                 console.error("Error getting location:", error);
@@ -50,55 +51,59 @@ export default function LunchSelector() {
         setIsSpinning(true);
         setSelectedLunch(null);
 
-        // Simulate thinking/spinning delay
-        setTimeout(() => {
-            let filtered = restaurantData.filter(r => {
-                const priceMatch = filters.price === 'all' || r.price === filters.price;
-                const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
-                return priceMatch && cuisineMatch;
-            });
+        // Get filtered restaurants
+        let filtered = restaurantData.filter(r => {
+            const priceMatch = filters.price === 'all' || r.price === filters.price;
+            const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
+            return priceMatch && cuisineMatch;
+        });
 
-            let fallbackMessage = null;
+        let fallbackMessage = null;
 
-            // If no results, try fallback strategies
-            if (filtered.length === 0) {
-                // Strategy 1: Try relaxing price filter only
-                if (filters.price !== 'all') {
-                    filtered = restaurantData.filter(r => {
-                        const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
-                        return cuisineMatch;
-                    });
-                    if (filtered.length > 0) {
-                        fallbackMessage = `No ${filters.price} ${filters.cuisine !== 'all' ? filters.cuisine : ''} restaurants open. Showing other prices.`;
-                    }
-                }
-
-                // Strategy 2: If still no results, try relaxing cuisine filter only
-                if (filtered.length === 0 && filters.cuisine !== 'all') {
-                    filtered = restaurantData.filter(r => {
-                        const priceMatch = filters.price === 'all' || r.price === filters.price;
-                        return priceMatch;
-                    });
-                    if (filtered.length > 0) {
-                        fallbackMessage = `No ${filters.cuisine} restaurants open. Showing other cuisines.`;
-                    }
-                }
-
-                // Strategy 3: If still no results, show all open restaurants
-                if (filtered.length === 0) {
-                    filtered = restaurantData;
-                    fallbackMessage = "No restaurants match your filters. Showing all open restaurants nearby.";
+        // Fallback logic
+        if (filtered.length === 0) {
+            if (filters.price !== 'all') {
+                filtered = restaurantData.filter(r => {
+                    const cuisineMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
+                    return cuisineMatch;
+                });
+                if (filtered.length > 0) {
+                    fallbackMessage = `No ${filters.price} ${filters.cuisine !== 'all' ? filters.cuisine : ''} restaurants open. Showing other prices.`;
                 }
             }
 
-            // If location is enabled (restaurants have distance), prioritize nearby options
+            if (filtered.length === 0 && filters.cuisine !== 'all') {
+                filtered = restaurantData.filter(r => {
+                    const priceMatch = filters.price === 'all' || r.price === filters.price;
+                    return priceMatch;
+                });
+                if (filtered.length > 0) {
+                    fallbackMessage = `No ${filters.cuisine} restaurants open. Showing other cuisines.`;
+                }
+            }
+
+            if (filtered.length === 0) {
+                filtered = restaurantData;
+                fallbackMessage = "No restaurants match your filters. Showing all open restaurants nearby.";
+            }
+        }
+
+        // Animate slot machine reels
+        const spinInterval = setInterval(() => {
+            setSpinningSlots([
+                filtered[Math.floor(Math.random() * filtered.length)],
+                filtered[Math.floor(Math.random() * filtered.length)],
+                filtered[Math.floor(Math.random() * filtered.length)]
+            ]);
+        }, 100);
+
+        // Stop spinning after delay and select winner
+        setTimeout(() => {
+            clearInterval(spinInterval);
+
             let selected;
             if (locationStatus === 'success' && filtered[0]?.distance) {
-                // Take the top 5 closest restaurants from filtered list (already sorted by distance)
                 const nearbyOptions = filtered.slice(0, Math.min(5, filtered.length));
-
-                // Weighted random: heavily favor the closest options
-                // Assign weights: closest gets 5, next gets 4, etc.
                 const weights = nearbyOptions.map((_, index) => nearbyOptions.length - index);
                 const totalWeight = weights.reduce((sum, w) => sum + w, 0);
 
@@ -115,18 +120,22 @@ export default function LunchSelector() {
 
                 selected = nearbyOptions[selectedIndex];
             } else {
-                // No location - pick randomly from all filtered
                 selected = filtered[Math.floor(Math.random() * filtered.length)];
             }
 
-            // Add fallback message to selected restaurant if applicable
             if (fallbackMessage) {
                 selected = { ...selected, fallbackMessage };
             }
 
-            setSelectedLunch(selected);
-            setIsSpinning(false);
-        }, 1500);
+            // Final slot reveal
+            setSpinningSlots([selected, selected, selected]);
+
+            setTimeout(() => {
+                setSelectedLunch(selected);
+                setIsSpinning(false);
+                setSpinningSlots([null, null, null]);
+            }, 500);
+        }, 2000);
     };
 
     const getFilteredRestaurants = () => {
@@ -170,7 +179,7 @@ export default function LunchSelector() {
                     </div>
 
                     <button onClick={decideLunch} className={styles.spinButton}>
-                        Pick My Lunch! 🎲
+                        🎰 Pull the Lever!
                     </button>
                 </div>
             )}
@@ -206,9 +215,26 @@ export default function LunchSelector() {
             )}
 
             {isSpinning && (
-                <div className={styles.spinner}>
-                    <div className={styles.emojiSpinner}>🤔</div>
-                    <p>Consulting the food gods...</p>
+                <div className={styles.slotMachine}>
+                    <div className={styles.slotMachineTop}>🎰</div>
+                    <div className={styles.slotReels}>
+                        {spinningSlots.map((restaurant, index) => (
+                            <div key={index} className={styles.slotReel}>
+                                <div className={styles.slotWindow}>
+                                    {restaurant && (
+                                        <div className={styles.slotItem}>
+                                            <div className={styles.slotEmoji}>{restaurant.emoji}</div>
+                                            <div className={styles.slotName}>{restaurant.name}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className={styles.slotLever}>
+                        <div className={styles.leverHandle}></div>
+                    </div>
+                    <p className={styles.slotText}>🍀 Finding your perfect lunch... 🍀</p>
                 </div>
             )}
 
