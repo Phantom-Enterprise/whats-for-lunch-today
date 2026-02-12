@@ -81,6 +81,28 @@ select:focus {
 .slotMachineBox {
     margin-top: 1rem;
     animation: fadeIn 0.5s ease;
+    text-align: center;
+}
+
+.slotMachineHeader {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        transform: scale(1);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+        transform: scale(1.1);
+    }
 }
 
 .slotMachineFrame {
@@ -174,6 +196,7 @@ select:focus {
 .slotEmoji {
     font-size: 3.5rem;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 .slotName {
@@ -184,6 +207,7 @@ select:focus {
     text-align: center;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

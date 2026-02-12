@@ -194,6 +194,7 @@ export default function LunchSelector() {
 
             {isSpinning && (
                 <div className={styles.slotMachineBox}>
+                    <div className={styles.slotMachineHeader}>🎰</div>
                     <div className={styles.slotMachineFrame}>
                         <div className={styles.slotLights}>
                             {[...Array(6)].map((_, i) => <div key={i} className={styles.lightBulb}></div>)}
