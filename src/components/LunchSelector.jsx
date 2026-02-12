@@ -178,7 +178,7 @@ export default function LunchSelector() {
                             const pMatch = filters.price === 'all' || r.price === filters.price;
                             const cMatch = filters.cuisine === 'all' || r.cuisine === filters.cuisine;
                             return pMatch && cMatch;
-                        }).slice(0, 10).map(r => (
+                        }).slice(0, 20).map(r => (
                             <div key={r.id} className={styles.listItem} onClick={() => setSelectedLunch(r)}>
                                 <div className={styles.listItemEmoji}>{r.emoji}</div>
                                 <div className={styles.listItemInfo}>
