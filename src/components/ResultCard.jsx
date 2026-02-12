@@ -40,16 +40,13 @@ export default function ResultCard({ restaurant, onReset }) {
                 </div>
 
                 <div className={styles.infoRow}>
-                    <span className={styles.distance}>📍 {restaurant.distance} from you</span>
+                    <div className={styles.address}>📍 {restaurant.address}</div>
+                    <div className={styles.distance}>{restaurant.distance} away</div>
                 </div>
 
                 <div className={styles.actionGrid}>
                     <a
-                        href={
-                            restaurant.lat && restaurant.lng
-                                ? `https://www.google.com/maps/dir/?api=1&destination=${restaurant.lat},${restaurant.lng}`
-                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name + ' Miami')}`
-                        }
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.primaryLink}
